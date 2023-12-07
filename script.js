@@ -34,6 +34,8 @@ function startQuiz() {
 }
 
 function showQuestion() {
+
+    resetState();
     let currentQxn = questions[currentQxnIndex];
     let qxnNo = currentQxnIndex + 1;
     questionElem.innerHTML = qxnNo + ". " + currentQxn.question;
@@ -42,6 +44,60 @@ function showQuestion() {
         const button = document.createElement("button");
         button.innerHTML = answer.text;
         button.classList.add("btn");
-        answerButton.appendChild(button);
+        ansBtnsElem.appendChild(button);
+        if (answer.correct) {
+            button.dataset.correct = answer.correct;
+        }
+        button.addEventListener("click", selectAnswer);
     })
 }
+
+function resetState() {
+    nextBtnElem.style.display = "none";
+    while (ansBtnsElem.firstChild) {
+        ansBtnsElem.removeChild(ansBtnsElem.firstChild);
+    }
+}
+
+function selectAnswer(e) {
+    const selectBtn = e.target;
+    const isCorrect = selectBtn.dataset.correct === "true";
+    if (isCorrect) {
+        selectBtn.classList.add("correct");
+        score++;
+    } else {
+        selectBtn.classList.add("incorrect");
+    }
+    Array.from(ansBtnsElem.children).forEach(button => {
+        if (button.dataset.correct === "true") {
+            button.classList.add("correct");
+        }
+        button.disabled = true;
+    });
+    nextBtnElem.style.display = "block";
+}
+
+function showScore() {
+    resetState();
+    questionElem.innerHTML = `You scored ${score} out of ${questions.length}!`;
+    nextBtnElem.innerHTML = "Play Again";
+    nextBtnElem.style.display = "block";
+}
+function handleNextButton() {
+    currentQxnIndex++;
+    if (currentQxnIndex < questions.length) {
+        showQuestion();
+    } else {
+        showScore();
+    }
+}
+
+nextBtnElem.addEventListener("click", () => {
+    if (currentQxnIndex < questions.length) {
+        handleNextButton();
+    } else {
+        startQuiz();
+    }
+})
+
+startQuiz();
